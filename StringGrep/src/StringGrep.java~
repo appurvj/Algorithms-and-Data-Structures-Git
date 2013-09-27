@@ -1,0 +1,148 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.LinkedList;
+
+/**
+ * Class to print strings in file conting substrings passed in
+ * 
+ * Usage: java StringGrep [filename] substrings(space seperated)
+ * 
+ */
+public class StringGrep {
+    private BufferedReader inFile;
+    private String regexMatch;
+    private String[] sortedStrings;
+
+    /**
+     * Getter Method for the sorted array 
+     */
+    public String[] getSortedStrings() {
+        return sortedStrings;
+    }
+    
+    
+    /**
+     * Constructor: also calls getSortedMatches() method to directly 
+     *              store the sorted array of strings in the class variable
+     * @param file: file to be searched
+     * @param regex: regular expression for matching strings
+     * @throws FileNotFoundException
+     * @throws IOException 
+     */
+    public StringGrep(String file, String regex)
+                    throws FileNotFoundException, IOException{       
+        inFile = new BufferedReader(new FileReader(file));
+        regexMatch = regex;
+        sortedStrings = getSortedMatches();
+    }
+    
+    
+    /**
+     * Perfoms line by line string matching using the regex pattern stored
+     * @return : calls sort method to return sorted array
+     * @throws IOException 
+     */
+    private String[] getSortedMatches()throws IOException{
+        LinkedList<String> list = new LinkedList<String>();
+        String matchStr;
+        while((matchStr = inFile.readLine())!= null){
+            if(matchStr.matches(regexMatch))
+                list.add(matchStr);
+        }
+        return sortArray(list.toArray(new String[list.size()]));
+    }
+    
+    
+    /**
+     * wrapper for recursive in-place quick sort implementaion
+     * @param array: array to be sorted
+     * @return same sorted array
+     */
+    String[] sortArray(String[] array){
+        quickSort(array, 0, array.length-1);
+        return array;
+    }
+    
+    
+    /**
+     * Recurvive quick-sort calls
+     */
+    private void quickSort(String[] strArray, int left, int right){
+        if(right>left){
+            int pivot = left + (right-left)/2;
+            pivot = partition(strArray, left, right, pivot);
+            quickSort(strArray, left, pivot-1);
+            quickSort(strArray, pivot+1, right);
+        }
+    }
+    
+    
+    /**
+     * Partitions array based on pivot value and thus fixes index of pivot
+     * @param strArray: array to be sorted
+     * @param left: leftmost index of section under consideration
+     * @param right: righmost index
+     * @param pivotIndex: index of chosen pivot
+     * @return 
+     */
+    private int partition(String[] strArray, int left, int right, int pivotIndex){
+        String pivotVal = strArray[pivotIndex];  
+        swap(strArray, pivotIndex, right);
+        int storeIndex = left;
+        for(int i = left; i<right;i++){
+            if(strArray[i].compareTo(pivotVal)<=0)
+                swap(strArray, i, storeIndex++);
+        }
+        swap(strArray, storeIndex, right);
+        return storeIndex;
+    }
+     
+          
+    /**
+     * swap elements based on indices passed in
+     */
+    void swap(String[] array, int pos1, int pos2){
+        String temp = array[pos1];
+        array[pos1] = array[pos2];
+        array[pos2] = temp;
+    }
+    
+    /**
+     * Make the regex expression using the commanline argumets following
+     * filename. eg: \w+(abc|def|ijk)\w+
+     * @param startIndex: used to indicate start index of substrings in the 
+     *                    commandline args array
+     * @return : regualr expression string
+     */
+    static String makeRegexExpr(String[] strArray, int startIndex){
+        StringBuffer output = new StringBuffer( "\\w*?(" +strArray[startIndex]);
+        for(int i= startIndex+1; i< strArray.length; i++)
+            output.append("|"+strArray[i]);
+        output.append(")\\w*?");
+        return output.toString();
+    }
+    
+    
+    /**
+     * Accept arguments,  perform the string selection and sorting using 
+     * the StringGrep Object and print the output
+     * @param args 
+     */
+    public static void main(String[] args){
+        try{
+        String regex = StringGrep.makeRegexExpr(args, 1);
+        StringGrep grep = new StringGrep(args[0], regex);
+        String[] result = grep.getSortedStrings();
+        for(int i = 0; i< result.length; i++)
+            System.out.println(result[i]);
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }catch(IOException i){
+            i.printStackTrace();
+        }
+        
+    }
+    
+}

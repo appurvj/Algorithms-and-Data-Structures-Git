@@ -1,0 +1,34 @@
+#include<cstdlib>
+#include<iostream>
+void merge_sort(int start,int end, int* X){
+  if(end - start > 1){
+    int mid = start + (end-start)/2;
+    merge_sort(start, mid, X);
+    merge_sort(mid, end, X);   
+    int * temp = new int[end - start]; //merge begins here
+    int p = start;
+    int q = mid;
+    for(int i = 0; i < end - start; i++)
+      temp[i] = p < mid &&( q >= end || X[p] <= X[q] )? X[p++]:X[q++];
+    for(int i = start; i < end; i++)
+      X[i] = temp[i-start];
+    free(temp);
+    temp = 0; //merge ends here 
+  }
+}
+
+
+
+/*
+using namespace std;
+int main(void)
+{
+  int test[] = {10, 8, 116,235,74,8,90,231, 4, 3, 22, 1};
+  merge_sort(0,sizeof(test)/sizeof(int), &test[0]);
+  for(int i = 0; i < sizeof(test)/sizeof(int); i++)
+  {
+    cout<<test[i]<<endl;
+  }
+  return 0;
+}
+*/
